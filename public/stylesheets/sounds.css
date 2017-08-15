@@ -1,0 +1,9 @@
+.sound-item {
+  display: flex !important;
+  align-items: center !important; }
+  .sound-item .badge {
+    height: 17px; }
+  .sound-item .flex-right {
+    margin-left: auto; }
+
+/*# sourceMappingURL=sounds.css.map */

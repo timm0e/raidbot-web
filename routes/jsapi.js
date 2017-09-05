@@ -1,13 +1,12 @@
 //@ts-check
 var express = require("express");
 var router = express.Router();
-var dblib = require("raidbot-redis-lib");
 var mediainfo = require("mediainfo-parser");
 var fs = require("fs");
 var formidable = require("formidable");
 var mv = require("mv");
 
-var db = new dblib.RaidBotDB("web-jsapi");
+var db;
 
 router.get("/categories", function(req, res, next) {
   db
@@ -230,4 +229,7 @@ router.put("/sounds/new", (req, res, next) => {
   });
 });
 
-module.exports = router;
+module.exports = raidbotdb => {
+  db = raidbotdb;
+  return router;
+};

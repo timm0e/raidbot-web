@@ -7,12 +7,15 @@
   },
   "dependencies": {
     "body-parser": "^1.17.2",
+    "connect-flash": "^0.1.1",
     "connect-redis": "^3.3.0",
     "cookie-parser": "^1.4.3",
     "debug": "^2.6.8",
     "express": "^4.15.4",
     "express-session": "^1.15.5",
+    "form-urlencoded": "^2.0.4",
     "formidable": "^1.1.1",
+    "ioredis": "^3.1.4",
     "mediainfo-parser": "^1.1.5",
     "morgan": "^1.8.2",
     "mv": "^2.1.1",
@@ -20,13 +23,16 @@
     "numeral": "^2.0.6",
     "pug": "^2.0.0-rc.3",
     "raidbot-redis-lib": "file:../raidbot-redis-lib/raidbot-redis-lib-1.0.0.tgz",
+    "request-promise-native": "^1.0.4",
     "serve-favicon": "^2.4.3"
   },
   "devDependencies": {
     "@types/express": "^4.0.37",
+    "@types/express-session": "^1.15.3",
     "@types/formidable": "^1.0.29",
     "@types/jquery": "^3.2.12",
     "@types/mv": "^2.1.0",
-    "@types/node": "^8.0.26"
+    "@types/node": "^8.0.26",
+    "@types/passport": "^0.3.4"
   }
 }

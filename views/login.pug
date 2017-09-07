@@ -1,8 +1,14 @@
 ul.nav.navbar-nav.navbar-right
-				li.dropdown
-					a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false")
-						| Login 
-						span.caret
-					ul.dropdown-menu
-						li
-							a(href="#"): img(src="/images/discord-login.png" width=300)
+	li.dropdown
+		a.dropdown-toggle(href="#", data-toggle="dropdown", role="button", aria-haspopup="true", aria-expanded="false")
+			if req.session.user
+				| #{req.session.user.name}
+			else
+				| Login
+			span.caret
+		ul.dropdown-menu
+			li
+				if req.session.user
+					a(href="/auth/logout") Logout
+				else
+					a(href="/auth/discord/"): img(src="/images/discord-login.png" alt="Discord Login" width=300)

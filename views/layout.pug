@@ -5,7 +5,8 @@ mixin alert(type, text)
       button.close(type="button" data-dismiss="alert")
         span &times;
       p= text
-
+block head
+  script(src="https://use.fontawesome.com/cd61a3bba5.js")
 block body
   include navbar
   .container-fluid

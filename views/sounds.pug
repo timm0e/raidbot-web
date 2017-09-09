@@ -1,34 +1,54 @@
 extends layout
 
-mixin category(text)
+mixin category(text, members)
     li.list-group-item.category= text
         span.glyphicon.glyphicon-chevron-right.pull-right
+        span.badge.pull-right= members
 
 mixin sound(name, length)
     li.sound-item.list-group-item= name
+        div.flex-left.edit-icon
+            a(onClick="alert('test')")
+                span.fa.fa-pencil
         div.flex-right
             span.badge(style="margin-right: 10px;")= length
             button(type="button").btn.btn-md.btn-default.sound-btn
                 span.glyphicon.glyphicon-play       
 
-block head
+append head
     title Sounds - RaidBot
     link(rel="stylesheet" href="/stylesheets/sounds.css")
+    link(rel="stylesheet" href="/stylesheets/bootstrap-tokenfield.min.css")
+    link(rel="stylesheet" href="/stylesheets/tokenfield-typeahead.min.css")
 
 block content
     .container-fluid
         .row
             .col-md-3
-                ul.list-group
-                    +category("Rage")
-                    +category("Fun")
-                    +category("Musik")
+                ul.list-group#categorylist
                     
             .col-md-9
-                ul.list-group
-                    +sound("Sound1", "0:58")
-                    +sound("Sound2", "0:15")
-                    +sound("Sound3", "0:07")
-
+                ul.list-group#soundlist
+                    
+    .modal.fade(tabindex="-1", role="dialog")#editSoundModal
+        .modal-dialog(role="document")
+            .modal-content
+                .modal-header
+                    button.close(type="button", data-dismiss="modal", aria-label="Close")
+                        span(aria-hidden="true") ×
+                    h4.modal-title Edit Sound
+                .modal-body
+                    .form-group
+                        label(for="name") Name
+                        input(type="text", placeholder="Name").form-control#name
+                    .form-group
+                        label(for="name") Categories
+                        input(type="text", placeholder="Categories").form-control#categories
+                .modal-footer
+                    button.btn.btn-danger.pull-left(onclick="deleteSound(this)") Delete Sound
+                    button.btn.btn-default(type="button", data-dismiss="modal") Close
+                    button.btn.btn-primary(type="button", onclick="updateSound(this)") Save changes
 block scripts
+    script(src="/javascripts/typeahead.bundle.js")
+    script(src="/javascripts/bootstrap-tokenfield.min.js")
     script(src="/javascripts/sounds.js")

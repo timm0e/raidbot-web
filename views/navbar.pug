@@ -7,16 +7,16 @@ nav.navbar.navbar-inverse(style="border-radius: 0px;")
 				span.icon-bar
 				span.icon-bar
 				span.icon-bar
-			a.navbar-brand(href="#") RaidBot
+			a.navbar-brand(href="/") RaidBot
 		// Collect the nav links, forms, and other content for toggling
 		#bs-example-navbar-collapse-1.collapse.navbar-collapse
 			ul.nav.navbar-nav
-				li
-					a(href="") Home
-				li
-					a(href="/sounds") Sounds
-				li
-					a(href="#") Upload
+				//only shown if logged in
+				if req.session.user
+					li
+						a(href="/sounds") Sounds
+					li
+						a(href="/upload") Upload
 				
 			include login
 		// /.navbar-collapse

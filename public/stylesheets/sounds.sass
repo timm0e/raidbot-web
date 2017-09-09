@@ -5,5 +5,35 @@
     .badge
         height: 17px
 
-    .flex-right
-        margin-left: auto        
+    button
+        transition: background-color .2s ease, border-color .2s ease
+
+.flex-right
+    margin-left: auto        
+
+.flex-left
+    margin-right: auto
+
+.edit-icon
+    margin-left: 10px
+    
+    .fa-pencil
+        opacity: 0.5
+        transition: opacity 0.25s ease-in-out
+        &:hover
+            opacity: 1
+    
+    a
+        color: black
+
+        &:hover
+            color: black
+
+.category
+    transition: background-color .25s ease
+
+    .badge
+        margin-right: 10px
+
+    &:hover
+        background-color: transparentize(grey, 0.8)

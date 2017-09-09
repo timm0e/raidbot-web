@@ -18,7 +18,6 @@ var raidbotdb = new raidbotlib.RaidBotDB("web"); //TODO: config
 
 
 var index = require("./routes/index");
-var users = require("./routes/users");
 var sounds = require("./routes/sounds");
 var jsapi = require("./routes/jsapi")(raidbotdb);
 var auth = require("./routes/auth")(redis);
@@ -70,8 +69,7 @@ app.use(
 app.use("/auth/", auth);
 
 app.use("/", index);
-app.use("/users", users);
-app.use("/sounds", sounds);
+app.use("/sounds", auth.authMiddleware, sounds);
 app.use("/jsapi", jsapi);
 
 

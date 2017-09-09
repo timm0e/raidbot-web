@@ -6,7 +6,16 @@ var fs = require("fs");
 var formidable = require("formidable");
 var mv = require("mv");
 
-var db;
+var db;// = new (require("raidbot-redis-lib")).RaidBotDB("test");
+
+var raidbotConfig = {
+  //FIXME: Replace this stub
+  clientID: "354448371404242945",
+  clientSecret: "PziouUFlBrGJ9ZMLrD2c_vmIj5NdpiHp",
+  guildId: "118431384854331396",
+  hostname: "http://127.0.0.1:3000",
+  filepath: "/mnt/RaidBot/sounds/"
+};
 
 router.get("/categories", function(req, res, next) {
   db
@@ -37,6 +46,17 @@ router.get("/categories/:cat_id/sounds", (req, res, next) => {
   } else res.sendStatus(404);
 });
 
+router.delete("/categories/:cat_id/:sound_id/", (req, res, next) => {
+  const cat_id = req.params.cat_id;
+  const sound_id = req.params.cat_id;
+
+  if (!isNaN(cat_id) && !isNaN(sound_id)) {
+    db.removeSoundFromCategory(cat_id, sound_id).then(() => {
+      res.sendStatus(200);
+    });
+  } else res.sendStatus(404);
+});
+
 router.delete("/categories/:cat_id/", (req, res, next) => {
   const cat_id = req.params.cat_id;
 
@@ -58,6 +78,17 @@ router.get("/sounds/", (req, res, next) => {
     })
     .then(sounds => {
       res.send(sounds);
+    });
+});
+
+router.get("/sounds/count", (req, res, next) => {
+  db
+    .getSoundsNumber()
+    .then(number => {
+      res.send(""+number);
+    })
+    .catch(() => {
+      res.sendStatus(500);
     });
 });
 
@@ -184,7 +215,7 @@ router.put("/sounds/new", (req, res, next) => {
     const file = files.sound;
 
     if (file && name) {
-      let newpath = "/mnt/RaidBot/sounds/" + file.hash; //TODO: req.app.get("sounddir")
+      let newpath = raidbotConfig.filepath + file.hash; //TODO: req.app.get("sounddir")
 
       fs.access(newpath, fs.constants.F_OK, err => {
         if (err) {
@@ -195,7 +226,7 @@ router.put("/sounds/new", (req, res, next) => {
               let duration = Math.ceil(obj.file.track[0].duration / 1000);
 
               db
-                .createSound(name, duration, file.hash)
+                .createSound(name, duration, req.session.user.id, file.hash)
                 .then(sound => {
                   return sound.id;
                 })

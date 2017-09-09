@@ -10,7 +10,8 @@ var raidbotConfig = {
   clientID: "354448371404242945",
   clientSecret: "PziouUFlBrGJ9ZMLrD2c_vmIj5NdpiHp",
   guildId: "118431384854331396",
-  hostname: "http://127.0.0.1:3000"
+  hostname: "http://127.0.0.1:3000",
+  filepath: "/mnt/RaidBot/sounds/"
 };
 
 const discordApi = {
@@ -19,6 +20,11 @@ const discordApi = {
   identifyUrl: "https://discordapp.com/api/v6/users/@me",
   guildsUrl: "https://discordapp.com/api/v6/users/@me/guilds"
 };
+
+router.get("/user", authMiddleware, (req, res, next) => {
+  res.send(req.session.user);
+});
+
 router.get("/discord", (req, res, next) => {
   let url =
     discordApi.authUrl +
@@ -103,6 +109,17 @@ router.get("/logout", (req, res, next) => {
     res.redirect("/");
 });
 
+function authMiddleware(req, res, next) {
+  if (req.session.user) {
+    next();
+  }
+  else {
+    req.flash("danger", "You are not logged in!");
+    res.redirect("/");
+  }
+}
+
+router.authMiddleware = authMiddleware;
 module.exports = db => {
   redis = db;
   return router;

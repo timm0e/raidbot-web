@@ -1,0 +1,9 @@
+{
+	"version": 3,
+	"file": "upload.css",
+	"sources": [
+		"upload.sass"
+	],
+	"mappings": "AAAA,AAAA,oBAAoB,CAAC;EACjB,OAAO,EAAE,KAAM;EACf,KAAK,EAAE,eAAgB,GAGD;EAL1B,AAIS,oBAJW,CAIhB,KAAK,AAAA,aAAa,CAAC;IACf,OAAO,EAAE,GAAI,GAAG;;AAExB,AAAA,aAAa,CAAC;EACV,WAAW,EAAE,IAAK,GAAG;;AAEzB,AAAA,SAAS,CAAC;EACN,MAAM,EAAE,eAAgB,GAAG",
+	"names": []
+}

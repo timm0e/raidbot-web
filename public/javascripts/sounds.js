@@ -1,86 +1,23 @@
-var User = (function () {
-    function User() {
-    }
-    return User;
-}());
-var Sound = (function () {
-    function Sound() {
-    }
-    return Sound;
-}());
-var Category = (function () {
-    function Category() {
-    }
-    return Category;
-}());
-var category = function (id, name, membercount) {
-    return "<li class=\"list-group-item category\" data-id=\"" + id + "\">" + name + "<span class=\"glyphicon glyphicon-chevron-right pull-right\"></span><span class=\"badge pull-right\">" + membercount + "</span></li>";
-};
-var sound = function (id, name, length) {
-    return "<li class=\"sound-item list-group-item\" data-id=\"" + id + ">" + name + "<div class=\"flex-right\"><span class=\"badge\" style=\"margin-right: 10px;\">" + length + "</span><button class=\"btn btn-md btn-default sound-btn\" type=\"button\"><span class=\"glyphicon glyphicon-play\"></span></button></div></li>";
-};
-var soundAdmin = function (id, name, length) {
-    return "<li class=\"sound-item list-group-item\" data-id=" + id + ">" + name + "<div class=\"flex-left edit-icon\"><a data-toggle=\"modal\" data-target=\"#editSoundModal\"><span class=\"fa fa-pencil\"></span></a></div><div class=\"flex-right\"><span class=\"badge\" style=\"margin-right: 10px;\">" + length + "</span><button class=\"btn btn-md btn-default sound-btn\" type=\"button\"><span class=\"glyphicon glyphicon-play\"></span></button></div></li>";
-};
-var listLoading = "<li class='list-group-item text-center'><span class='fa fa-refresh fa-spin'></span></li>";
-$(document).ready(function () {
-    loadCategories(function () {
-        $("#categorylist").children().first().click();
-    });
-    $("#editSoundModal").on("show.bs.modal", function (event) {
-        var modal = $(this);
-        var soundID = $(event.relatedTarget).parents(".sound-item").data("id");
-        $.getJSON("/jsapi/sounds/" + soundID).done(function (sound) {
-            modal.find("#name").val(sound.name);
-        });
-    });
-});
-function loadCategories(callback) {
-    var categorylist = $("#categorylist");
-    categorylist.empty();
-    categorylist.append(listLoading);
-    $.get("/jsapi/sounds/count").done(function (allcount) {
-        $.getJSON("/jsapi/categories").done(function (data) {
-            categorylist.empty();
-            categorylist.append(category(null, "<strong>All</strong>", allcount));
-            data.forEach(function (element) {
-                categorylist.append(category(element.id, element.name, element.membercount));
-            });
-            $(".category").click(function () {
-                $(".category").removeClass("active");
-                $(this).addClass("active");
-                var id = $(this).data("id");
-                loadSounds(id);
-            });
-            if (callback)
-                callback();
-        });
-    });
-}
-function loadSounds(cat_id) {
-    var soundlist = $("#soundlist");
-    var apiurl = cat_id ? "/jsapi/categories/" + cat_id + "/sounds" : "/jsapi/sounds";
-    soundlist.empty();
-    soundlist.append(listLoading);
-    $.getJSON("/auth/user").done(function (user) {
-        $.getJSON(apiurl).done(function (data) {
-            soundlist.empty();
-            data.forEach(function (element) {
-                if (element.owner == user.id)
-                    soundlist.append(soundAdmin(element.id, element.name, formatTime(element.length)));
-                else
-                    soundlist.append(sound(element.id, element.name, formatTime(element.length)));
-            });
-        });
-    });
-}
-function formatTime(time) {
-    var seconds = time % 60;
-    var minutes = (time - seconds) / 60;
-    var secondsString = ("00" + seconds).slice(-2);
-    return minutes + ":" + secondsString;
-}
-function editSound(obj) {
-    var id = $(obj).parents(".sound-item").data("id");
-    console.log(id);
-}
+var $jscomp=$jscomp||{};$jscomp.scope={};$jscomp.findInternal=function(a,b,d){a instanceof String&&(a=String(a));for(var e=a.length,c=0;c<e;c++){var f=a[c];if(b.call(d,f,c,a))return{i:c,v:f}}return{i:-1,v:void 0}};$jscomp.ASSUME_ES5=!1;$jscomp.ASSUME_NO_NATIVE_MAP=!1;$jscomp.ASSUME_NO_NATIVE_SET=!1;$jscomp.defineProperty=$jscomp.ASSUME_ES5||"function"==typeof Object.defineProperties?Object.defineProperty:function(a,b,d){a!=Array.prototype&&a!=Object.prototype&&(a[b]=d.value)};
+$jscomp.getGlobal=function(a){return"undefined"!=typeof window&&window===a?a:"undefined"!=typeof global&&null!=global?global:a};$jscomp.global=$jscomp.getGlobal(this);$jscomp.polyfill=function(a,b,d,e){if(b){d=$jscomp.global;a=a.split(".");for(e=0;e<a.length-1;e++){var c=a[e];c in d||(d[c]={});d=d[c]}a=a[a.length-1];e=d[a];b=b(e);b!=e&&null!=b&&$jscomp.defineProperty(d,a,{configurable:!0,writable:!0,value:b})}};
+$jscomp.polyfill("Array.prototype.find",function(a){return a?a:function(a,d){return $jscomp.findInternal(this,a,d).v}},"es6","es3");$jscomp.SYMBOL_PREFIX="jscomp_symbol_";$jscomp.initSymbol=function(){$jscomp.initSymbol=function(){};$jscomp.global.Symbol||($jscomp.global.Symbol=$jscomp.Symbol)};$jscomp.Symbol=function(){var a=0;return function(b){return $jscomp.SYMBOL_PREFIX+(b||"")+a++}}();
+$jscomp.initSymbolIterator=function(){$jscomp.initSymbol();var a=$jscomp.global.Symbol.iterator;a||(a=$jscomp.global.Symbol.iterator=$jscomp.global.Symbol("iterator"));"function"!=typeof Array.prototype[a]&&$jscomp.defineProperty(Array.prototype,a,{configurable:!0,writable:!0,value:function(){return $jscomp.arrayIterator(this)}});$jscomp.initSymbolIterator=function(){}};$jscomp.arrayIterator=function(a){var b=0;return $jscomp.iteratorPrototype(function(){return b<a.length?{done:!1,value:a[b++]}:{done:!0}})};
+$jscomp.iteratorPrototype=function(a){$jscomp.initSymbolIterator();a={next:a};a[$jscomp.global.Symbol.iterator]=function(){return this};return a};$jscomp.makeIterator=function(a){$jscomp.initSymbolIterator();var b=a[Symbol.iterator];return b?b.call(a):$jscomp.arrayIterator(a)};$jscomp.FORCE_POLYFILL_PROMISE=!1;
+$jscomp.polyfill("Promise",function(a){function b(){this.batch_=null}function d(a){return a instanceof c?a:new c(function(b,g){b(a)})}if(a&&!$jscomp.FORCE_POLYFILL_PROMISE)return a;b.prototype.asyncExecute=function(a){null==this.batch_&&(this.batch_=[],this.asyncExecuteBatch_());this.batch_.push(a);return this};b.prototype.asyncExecuteBatch_=function(){var a=this;this.asyncExecuteFunction(function(){a.executeBatch_()})};var e=$jscomp.global.setTimeout;b.prototype.asyncExecuteFunction=function(a){e(a,
+0)};b.prototype.executeBatch_=function(){for(;this.batch_&&this.batch_.length;){var a=this.batch_;this.batch_=[];for(var b=0;b<a.length;++b){var c=a[b];delete a[b];try{c()}catch(k){this.asyncThrow_(k)}}}this.batch_=null};b.prototype.asyncThrow_=function(a){this.asyncExecuteFunction(function(){throw a;})};var c=function(a){this.state_=0;this.result_=void 0;this.onSettledCallbacks_=[];var b=this.createResolveAndReject_();try{a(b.resolve,b.reject)}catch(h){b.reject(h)}};c.prototype.createResolveAndReject_=
+function(){function a(a){return function(g){c||(c=!0,a.call(b,g))}}var b=this,c=!1;return{resolve:a(this.resolveTo_),reject:a(this.reject_)}};c.prototype.resolveTo_=function(a){if(a===this)this.reject_(new TypeError("A Promise cannot resolve to itself"));else if(a instanceof c)this.settleSameAsPromise_(a);else{a:switch(typeof a){case "object":var b=null!=a;break a;case "function":b=!0;break a;default:b=!1}b?this.resolveToNonPromiseObj_(a):this.fulfill_(a)}};c.prototype.resolveToNonPromiseObj_=function(a){var b=
+void 0;try{b=a.then}catch(h){this.reject_(h);return}"function"==typeof b?this.settleSameAsThenable_(b,a):this.fulfill_(a)};c.prototype.reject_=function(a){this.settle_(2,a)};c.prototype.fulfill_=function(a){this.settle_(1,a)};c.prototype.settle_=function(a,b){if(0!=this.state_)throw Error("Cannot settle("+a+", "+b|"): Promise already settled in state"+this.state_);this.state_=a;this.result_=b;this.executeOnSettledCallbacks_()};c.prototype.executeOnSettledCallbacks_=function(){if(null!=this.onSettledCallbacks_){for(var a=
+this.onSettledCallbacks_,b=0;b<a.length;++b)a[b].call(),a[b]=null;this.onSettledCallbacks_=null}};var f=new b;c.prototype.settleSameAsPromise_=function(a){var b=this.createResolveAndReject_();a.callWhenSettled_(b.resolve,b.reject)};c.prototype.settleSameAsThenable_=function(a,b){var c=this.createResolveAndReject_();try{a.call(b,c.resolve,c.reject)}catch(k){c.reject(k)}};c.prototype.then=function(a,b){function d(a,b){return"function"==typeof a?function(b){try{e(a(b))}catch(l){f(l)}}:b}var e,f,g=new c(function(a,
+b){e=a;f=b});this.callWhenSettled_(d(a,e),d(b,f));return g};c.prototype.catch=function(a){return this.then(void 0,a)};c.prototype.callWhenSettled_=function(a,b){function c(){switch(d.state_){case 1:a(d.result_);break;case 2:b(d.result_);break;default:throw Error("Unexpected state: "+d.state_);}}var d=this;null==this.onSettledCallbacks_?f.asyncExecute(c):this.onSettledCallbacks_.push(function(){f.asyncExecute(c)})};c.resolve=d;c.reject=function(a){return new c(function(b,c){c(a)})};c.race=function(a){return new c(function(b,
+c){for(var e=$jscomp.makeIterator(a),f=e.next();!f.done;f=e.next())d(f.value).callWhenSettled_(b,c)})};c.all=function(a){var b=$jscomp.makeIterator(a),e=b.next();return e.done?d([]):new c(function(a,c){function f(b){return function(c){g[b]=c;h--;0==h&&a(g)}}var g=[],h=0;do g.push(void 0),h++,d(e.value).callWhenSettled_(f(g.length-1),c),e=b.next();while(!e.done)})};return c},"es6","es3");
+var User=function(){return function(){}}(),Sound=function(){return function(){}}(),Category=function(){return function(){}}(),category=function(a,b,d){return'<li class="list-group-item category" data-id="'+a+'">'+b+'<span class="glyphicon glyphicon-chevron-right pull-right"></span><span class="badge pull-right">'+d+"</span></li>"},sound=function(a,b,d){return'<li class="sound-item list-group-item" data-id="'+a+">"+b+'<div class="flex-right"><span class="badge" style="margin-right: 10px;">'+d+'</span><button class="btn btn-md btn-default sound-btn" type="button"><span class="glyphicon glyphicon-play"></span></button></div></li>'},
+soundAdmin=function(a,b,d){return'<li class="sound-item list-group-item" data-id='+a+">"+b+'<div class="flex-left edit-icon"><a data-toggle="modal" data-target="#editSoundModal"><span class="fa fa-pencil"></span></a></div><div class="flex-right"><span class="badge" style="margin-right: 10px;">'+d+'</span><button class="btn btn-md btn-default sound-btn" type="button"><span class="glyphicon glyphicon-play"></span></button></div></li>'},listLoading="<li class='list-group-item text-center'><span class='fa fa-refresh fa-spin'></span></li>",
+entityMap={"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;","/":"&#x2F;","`":"&#x60;","=":"&#x3D;"};function escapeHtml(a){return String(a).replace(/[&<>"'`=\/]/g,function(a){return entityMap[a]})}
+$(document).ready(function(){loadCategories(function(){$("#categorylist").children().first().click();$(".tt-input").focusout(function(){var a=this;setTimeout(function(){return $(a).val("")},1)})});$(document).on("show.bs.modal",".modal",function(){var a=1040+10*$(".modal:visible").length;$(this).css("z-index",a);setTimeout(function(){$(".modal-backdrop").not(".modal-stack").css("z-index",a-1).addClass("modal-stack")},0)});$(document).on("hidden.bs.modal",".modal",function(){$(".modal:visible").length&&
+$(document.body).addClass("modal-open")});$("#editSoundModal").on("show.bs.modal",function(a){var b=$(this),d=$(a.relatedTarget).parents(".sound-item").data("id");$("#categories").tagsinput("removeAll");$.getJSON("/jsapi/sounds/"+d).done(function(a){b.find("#name").val(a.name);a.id=d;b.data("sound",a)});$.getJSON("/jsapi/sounds/"+d+"/categories").done(function(a){var c=b.find("#categories");a.forEach(function(a){c.tagsinput("add",a.name)});b.data("categories_prev",c.val())})});$("#deleteSoundModal").on("show.bs.modal",
+function(a){a=$(a.relatedTarget).parents("#editSoundModal").data("sound");$(this).data("sound",a)})});
+function loadCategories(a){var b=$("#categorylist");b.empty();b.append(listLoading);$.get("/jsapi/sounds/count").done(function(d){$.getJSON("/jsapi/categories").done(function(e){b.empty();b.append(category(null,"<strong>All</strong>",d));e.forEach(function(a){b.append($(category(a.id,escapeHtml(a.name),a.membercount)).fadeIn(200))});$(".category").click(function(){$(".category").removeClass("active");$(this).addClass("active");var a=$(this).data("id");loadSounds(a)});a&&a()})})}
+function loadSounds(a){var b=$("#soundlist"),d=a?"/jsapi/categories/"+a+"/sounds":"/jsapi/sounds";b.empty();b.append(listLoading);$.getJSON("/auth/user").done(function(a){$.getJSON(d).done(function(c){b.hide();b.empty();c.forEach(function(c){c.owner==a.id||a.isAdmin?b.append(soundAdmin(c.id,escapeHtml(c.name),formatTime(c.length))):b.append(sound(c.id,escapeHtml(c.name),formatTime(c.length)))});b.fadeIn(200);0})})}function formatTime(a){var b=a%60;a=(a-b)/60;b=("00"+b).slice(-2);return a+":"+b}
+function updateSound(a){var b=$(a).parents("#editSoundModal").data("sound"),d=$(a).parents("#editSoundModal").data("categories_prev"),e=$("#name").val(),c=$("#categories").val();Promise.all([new Promise(function(a,c){if(b.name!=e){var d=new FormData;d.append("name",e);$.ajax({url:"/jsapi/sounds/"+b.id,method:"POST",data:d,contentType:!1,processData:!1,success:function(){a()},error:function(a){c(a)}})}else a()}),new Promise(function(a,e){if(JSON.stringify(d)!=JSON.stringify(c)){var f=new FormData;
+f.append("categories",JSON.stringify(c));$.ajax({url:"/jsapi/sounds/"+b.id+"/categories",method:"POST",data:f,contentType:!1,processData:!1,success:function(){a()},error:function(a){e(a)}})}else a()})]).then(function(){$("#editSoundModal").modal("hide");reload()})}function deleteSound(a){a=$(a).parents("#deleteSoundModal").data("sound");$.ajax({url:"/jsapi/sounds/"+a.id,method:"DELETE"}).done(function(){$(".modal").modal("hide");reload()})}
+function reload(){var a=$("#categorylist > .active").data("id");loadCategories(function(){$("#categorylist").find('[data-id="'+a+'"]');a&&0<a.length?a.click():$("#categorylist").children().first().click()})}var categories=new Bloodhound({datumTokenizer:Bloodhound.tokenizers.obj.whitespace("name"),queryTokenizer:Bloodhound.tokenizers.whitespace,prefetch:{url:"/jsapi/categories"}});categories.initialize();$("select").tagsinput({typeaheadjs:{name:"categories",displayKey:"name",valueKey:"name",source:categories.ttAdapter()}});

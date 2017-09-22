@@ -1,12 +1,12 @@
 extends bootstrap
 
 mixin alert(type, text)
-    .alert.alert-dismissible.fade.in(class=`alert-${type}` role="alert" style='margin-left: auto; margin-right: auto;')
+    .alert.alert-dismissible.fade.in(class=`alert-${type}` role="alert" style='margin-left: auto; margin-right: auto;') !{text}
       button.close(type="button" data-dismiss="alert")
         span &times;
-      p= text
 block head
   script(src="https://use.fontawesome.com/cd61a3bba5.js")
+  block header
 block body
   include navbar
   .container-fluid

@@ -1,0 +1,13 @@
+.bootstrap-tagsinput {
+  display: block;
+  width: 100% !important; }
+  .bootstrap-tagsinput input::placeholder {
+    opacity: 0.8; }
+
+#uploadButton {
+  margin-left: 10px; }
+
+.progress {
+  height: 34px !important; }
+
+/*# sourceMappingURL=upload.css.map */

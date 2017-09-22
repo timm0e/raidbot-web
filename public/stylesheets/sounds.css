@@ -6,6 +6,9 @@
   .sound-item button {
     transition: background-color .2s ease, border-color .2s ease; }
 
+.category {
+  display: block !important; }
+
 .flex-right {
   margin-left: auto; }
 
@@ -30,5 +33,14 @@
     margin-right: 10px; }
   .category:hover {
     background-color: rgba(128, 128, 128, 0.2); }
+
+.bootstrap-tagsinput {
+  display: block;
+  width: 100% !important; }
+  .bootstrap-tagsinput input::placeholder {
+    opacity: 0.8; }
+
+.container {
+  overflow-y: scroll; }
 
 /*# sourceMappingURL=sounds.css.map */

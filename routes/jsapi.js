@@ -6,10 +6,11 @@ var fs = require("fs");
 var formidable = require("formidable");
 var mv = require("mv");
 
-var db;// = new (require("raidbot-redis-lib")).RaidBotDB("test");
+var db = new (require("raidbot-redis-lib")).RaidBotDB("test");
 
 var raidbotConfig = {
   //FIXME: Replace this stub
+  //TODO: TOML
   clientID: "354448371404242945",
   clientSecret: "PziouUFlBrGJ9ZMLrD2c_vmIj5NdpiHp",
   guildId: "118431384854331396",
@@ -20,6 +21,15 @@ var raidbotConfig = {
 router.get("/categories", function(req, res, next) {
   db
     .getCategories()
+    .then(categories =>
+      categories.sort((a, b) => {
+        if (a.membercount > b.membercount) return -1;
+
+        if (a.membercount < b.membercount) return 1;
+
+        return 0;
+      })
+    )
     .then(categories => {
       return JSON.stringify(categories);
     })
@@ -85,7 +95,7 @@ router.get("/sounds/count", (req, res, next) => {
   db
     .getSoundsNumber()
     .then(number => {
-      res.send(""+number);
+      res.send("" + number);
     })
     .catch(() => {
       res.sendStatus(500);
@@ -108,6 +118,9 @@ router.get("/sounds/:sound_id/", (req, res, next) => {
 
 router.post("/sounds/:sound_id/", (req, res, next) => {
   const form = new formidable.IncomingForm();
+  form.onPart = part => {
+    if (!part.filename) form.handlePart(part);
+  };
   form.parse(req, (err, fields, files) => {
     const sound_id = req.params.sound_id;
     const name = fields.name;
@@ -126,9 +139,25 @@ router.post("/sounds/:sound_id/", (req, res, next) => {
 router.delete("/sounds/:sound_id", (req, res, next) => {
   const sound_id = req.params.sound_id;
 
-  db.deleteSound(sound_id).then(() => {
-    res.sendStatus(200);
-  });
+  db
+    .getSoundById(sound_id)
+    .then(sound =>
+      Promise.all([
+        db.deleteSound(sound_id),
+        new Promise((resolve, reject) => {
+          fs.unlink(raidbotConfig.filepath + sound.file, err => {
+            if (err) reject(err);
+            else resolve();
+          });
+        })
+      ])
+    )
+    .then(() => {
+      res.sendStatus(200);
+    })
+    .catch(() => {
+      res.sendStatus(500);
+    });
 });
 
 router.get("/sounds/:sound_id/categories", (req, res, next) => {
@@ -142,6 +171,80 @@ router.get("/sounds/:sound_id/categories", (req, res, next) => {
     .then(categories => {
       res.send(categories);
     });
+});
+
+router.post("/sounds/:sound_id/categories", (req, res, next) => {
+  const sound_id = req.params.sound_id;
+
+  const form = new formidable.IncomingForm();
+  form.onPart = part => {
+    if (!part.filename) form.handlePart(part);
+  };
+
+  form.parse(req, (err, fields) => {
+    if (!fields.categories) {
+      res.sendStatus(400);
+      return;
+    }
+
+    const categories = {
+      strings: (function() {
+        try {
+          return JSON.parse(fields.categories);
+        } catch (err) {
+          return [];
+        }
+      })(),
+      map: {},
+      before: [],
+      after: []
+    };
+
+    Promise.all([
+      db.getCategories().then(categoryList => {
+        categoryList.forEach(function(category) {
+          categories.map[category.name.toLowerCase()] = category;
+        }, this);
+      }),
+      db.getCategoriesForSound(sound_id).then(categoryList => {
+        categories.before = categoryList.map(category => category.id);
+      })
+    ])
+      .then(() => {
+        const promises = [];
+        categories.strings.forEach(function(categoryString) {
+          if (categories.map[categoryString.toLowerCase()]) {
+            const cat_id = categories.map[categoryString.toLowerCase()].id;
+            categories.after.push(cat_id);
+
+            if (!categories.before.includes(cat_id)) {
+              promises.push(db.addSoundToCategory(sound_id, cat_id));
+            }
+          } else {
+            promises.push(
+              db.createCategory(categoryString).then(category => {
+                db.addSoundToCategory(sound_id, category.id);
+                //No need to add this category to categories.after, since this category is new, thus the sound could not have been removed from it
+              })
+            );
+          }
+        }, this);
+        return Promise.all(promises);
+      })
+      .then(() => {
+        const promises = [];
+        categories.before.forEach(function(categoryID) {
+          if (!categories.after.includes(categoryID)) {
+            promises.push(db.removeSoundFromCategory(categoryID, sound_id));
+          }
+        }, this);
+
+        return Promise.all(promises);
+      })
+      .then(() => {
+        res.sendStatus(200);
+      });
+  });
 });
 
 router.post("/joinsound/:uid/", (req, res, next) => {
@@ -204,7 +307,6 @@ router.put("/sounds/new", (req, res, next) => {
   form.keepExtensions = false;
   form.maxFieldsSize = 10 * 1024 * 1024;
   form.onPart = part => {
-    console.log(JSON.stringify(part));
     if (!part.filename || part.name == "sound") {
       form.handlePart(part);
     }
@@ -214,15 +316,13 @@ router.put("/sounds/new", (req, res, next) => {
     const categories = fields.categories;
     const file = files.sound;
 
-    if (file && name) {
-      let newpath = raidbotConfig.filepath + file.hash; //TODO: req.app.get("sounddir")
+    if (file && name && name != "" && file != undefined) {
+      let newpath = raidbotConfig.filepath + file.hash;
 
       fs.access(newpath, fs.constants.F_OK, err => {
         if (err) {
           mv(file.path, newpath, err => {
-            debugger;
             mediainfo.exec(newpath, (err, obj) => {
-              debugger;
               let duration = Math.ceil(obj.file.track[0].duration / 1000);
 
               db
@@ -231,31 +331,59 @@ router.put("/sounds/new", (req, res, next) => {
                   return sound.id;
                 })
                 .then(sid => {
-                  let cat_ids =
-                    categories != undefined ? categories.split(",") : [];
-                  let promises = [];
-                  cat_ids.forEach(cat => {
-                    if (!isNaN(cat)) {
-                      promises.push(db.addSoundToCategory(sid, cat));
-                    }
-                  });
-                  return Promise.all(promises);
+                  const categories = {
+                    strings: JSON.parse(fields.categories),
+                    map: {}
+                  };
+
+                  return db
+                    .getCategories()
+                    .then(categoryList => {
+                      categoryList.forEach(function(category) {
+                        categories.map[category.name.toLowerCase()] = category;
+                      }, this);
+                    })
+                    .then(() => {
+                      const promises = [];
+                      categories.strings.forEach(function(categoryString) {
+                        if (categories.map[categoryString.toLowerCase()]) {
+                          const cat_id =
+                            categories.map[categoryString.toLowerCase()].id;
+
+                          promises.push(db.addSoundToCategory(sid, cat_id));
+                        } else {
+                          promises.push(
+                            db.createCategory(categoryString).then(category => {
+                              db.addSoundToCategory(sid, category.id);
+                            })
+                          );
+                        }
+                      }, this);
+                      return Promise.all(promises);
+                    });
                 })
                 .then(() => {
+                  req.flash("success", "Sound uploaded successfully!");
                   res.sendStatus(200);
                 })
                 .catch(err => {
-                  res.status(500);
-                  res.send(JSON.stringify);
+                  req.flash("danger", "Something went wrong...");
+                  res.sendStatus(500);
                 });
-              debugger;
             });
           });
         } else {
+          req.flash("danger", "Sound already exists!");
           res.status(409);
           res.send("Already exists!");
         }
       });
+    } else {
+      req.flash(
+        "danger",
+        "Please fill in <strong>Name</strong> and <strong>Sound</strong>"
+      );
+      res.sendStatus(400);
     }
   });
 });

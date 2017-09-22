@@ -1,0 +1,29 @@
+extends layout
+
+block header
+	link(rel="stylesheet", href="/stylesheets/upload.css")
+	link(rel="stylesheet", href="/stylesheets/bootstrap-tagsinput.css")
+	link(rel="stylesheet", href="/stylesheets/bootstrap-tagsinput-typeahead.css")
+	title Upload - RaidBot
+
+
+block content
+	.container#uploadContainer
+		h2 Upload Sound
+		.form-group
+			label(for="name") Name
+			input(type="text", placeholder="Name").form-control#name
+		.form-group
+			label(for="categories") Categories
+			//input(type="text", placeholder="Categories", data-role="tagsinput").form-control#categories
+			select(multiple, data-role="tagsinput", placeholder="Categories")#categories
+		.form-group
+			label(for="file") Sound
+			input(type="file", accept="audio/*").form-control#file
+		button.btn.btn-primary.pull-right(onclick="upload()")#uploadButton Upload
+
+
+block scripts
+	script(src="/javascripts/typeahead.bundle.js")
+	script(src="/javascripts/bootstrap-tagsinput.min.js")
+	script(src="/javascripts/upload.js")

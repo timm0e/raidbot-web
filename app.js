@@ -17,8 +17,7 @@ var redis = new ioredis({ connectionName: "webAuth", db: 1 });
 var raidbotdb = new raidbotlib.RaidBotDB("web"); //TODO: config
 
 
-var index = require("./routes/index");
-var sounds = require("./routes/sounds");
+var generic = require("./routes/generic");
 var jsapi = require("./routes/jsapi")(raidbotdb);
 var auth = require("./routes/auth")(redis);
 
@@ -68,9 +67,10 @@ app.use(
 
 app.use("/auth/", auth);
 
-app.use("/", index);
-app.use("/sounds", auth.authMiddleware, sounds);
-app.use("/jsapi", jsapi);
+app.use("/", generic("index"));
+app.use("/sounds", auth.authMiddleware, generic("sounds"));
+app.use("/upload", auth.authMiddleware, generic("upload"));
+app.use("/jsapi", jsapi); //TODO: Auth Middleware
 
 
 // catch 404 and forward to error handler

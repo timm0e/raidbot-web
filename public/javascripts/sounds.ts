@@ -6,7 +6,7 @@ class User {
 }
 
 class Sound {
-  id: number;
+  id?: number;
   name: string;
   length: number;
   file: string;
@@ -31,21 +31,83 @@ const soundAdmin = (id, name, length) =>
 const listLoading: string =
   "<li class='list-group-item text-center'><span class='fa fa-refresh fa-spin'></span></li>";
 
+var entityMap = {
+  "&": "&amp;",
+  "<": "&lt;",
+  ">": "&gt;",
+  '"': "&quot;",
+  "'": "&#39;",
+  "/": "&#x2F;",
+  "`": "&#x60;",
+  "=": "&#x3D;"
+};
+
+function escapeHtml(string: string): String {
+  return String(string).replace(/[&<>"'`=\/]/g, function(s) {
+    return entityMap[s];
+  });
+}
+
 $(document).ready(() => {
   loadCategories(() => {
-    $("#categorylist").children().first().click();
+    $("#categorylist")
+      .children()
+      .first()
+      .click();
+
+    //Fix Typeahead Stuff
+    $(".tt-input").focusout(function() {
+      setTimeout(() => $(this).val(""), 1);
+    });
+  });
+
+  $(document).on("show.bs.modal", ".modal", function() {
+    var zIndex = 1040 + 10 * $(".modal:visible").length;
+    $(this).css("z-index", zIndex);
+    setTimeout(function() {
+      $(".modal-backdrop")
+        .not(".modal-stack")
+        .css("z-index", zIndex - 1)
+        .addClass("modal-stack");
+    }, 0);
+  });
+
+  $(document).on("hidden.bs.modal", ".modal", function() {
+    $(".modal:visible").length && $(document.body).addClass("modal-open");
   });
 
   $("#editSoundModal").on("show.bs.modal", function(event) {
     const modal = $(this);
-    const soundID = $(event.relatedTarget).parents(".sound-item").data("id");
-    let categories;
+    const soundID = $(event.relatedTarget)
+      .parents(".sound-item")
+      .data("id");
+
+    $("#categories").tagsinput("removeAll");
 
     $.getJSON(`/jsapi/sounds/${soundID}`).done((sound: Sound) => {
       modal.find("#name").val(sound.name);
+      sound.id = soundID;
+      modal.data("sound", sound);
     });
 
-    //TODO: Categories
+    $.getJSON(
+      `/jsapi/sounds/${soundID}/categories`
+    ).done((categories: Category[]) => {
+      const categoryInput = modal.find("#categories");
+
+      categories.forEach(category => {
+        categoryInput.tagsinput("add", category.name);
+      });
+
+      modal.data("categories_prev", categoryInput.val());
+    });
+  });
+
+  $("#deleteSoundModal").on("show.bs.modal", function(event) {
+    const sound = $(event.relatedTarget)
+      .parents("#editSoundModal")
+      .data("sound");
+    $(this).data("sound", sound);
   });
 });
 
@@ -60,10 +122,12 @@ function loadCategories(callback?): void {
       categorylist.append(category(null, "<strong>All</strong>", allcount));
       data.forEach(element => {
         categorylist.append(
-          category(element.id, element.name, element.membercount)
+          $(
+            category(element.id, escapeHtml(element.name), element.membercount)
+          ).fadeIn(200)
         );
       });
-  
+
       $(".category").click(function() {
         $(".category").removeClass("active");
         $(this).addClass("active");
@@ -71,27 +135,43 @@ function loadCategories(callback?): void {
         loadSounds(id);
       });
 
-      if (callback)
-        callback();
+      if (callback) callback();
     });
-  })
+  });
 }
 
 function loadSounds(cat_id: number): void {
   const soundlist = $("#soundlist");
-  const apiurl = cat_id ? `/jsapi/categories/${cat_id}/sounds` : "/jsapi/sounds";
+  const apiurl = cat_id
+    ? `/jsapi/categories/${cat_id}/sounds`
+    : "/jsapi/sounds";
   soundlist.empty();
   soundlist.append(listLoading);
 
   $.getJSON("/auth/user").done((user: User) => {
     $.getJSON(apiurl).done((data: Sound[]) => {
+      soundlist.hide();
       soundlist.empty();
       data.forEach(element => {
-        if (element.owner == user.id)
-          soundlist.append(soundAdmin(element.id, element.name, formatTime(element.length)));
+        if (element.owner == user.id || user.isAdmin)
+          soundlist.append(
+            soundAdmin(
+              element.id,
+              escapeHtml(element.name),
+              formatTime(element.length)
+            )
+          );
         else
-          soundlist.append(sound(element.id, element.name, formatTime(element.length)));
+          soundlist.append(
+            sound(
+              element.id,
+              escapeHtml(element.name),
+              formatTime(element.length)
+            )
+          );
       });
+      soundlist.fadeIn(200);
+      0;
     });
   });
 }
@@ -103,7 +183,113 @@ function formatTime(time: number): string {
   return `${minutes}:${secondsString}`;
 }
 
-function editSound(obj) {
-  let id = $(obj).parents(".sound-item").data("id");
-  console.log(id);
+function updateSound(obj) {
+  const sound: Sound = $(obj)
+    .parents("#editSoundModal")
+    .data("sound");
+
+  let categories_prev: string[] = $(obj)
+    .parents("#editSoundModal")
+    .data("categories_prev");
+
+  const name: string = $("#name").val() as string;
+  const categories: string[] = $("#categories").val() as string[];
+
+  Promise.all([
+    new Promise((resolve, reject) => {
+      if (sound.name != name) {
+        const form = new FormData();
+        form.append("name", name);
+        $.ajax({
+          url: `/jsapi/sounds/${sound.id}`,
+          method: "POST",
+          data: form,
+          contentType: false,
+          processData: false,
+          success: () => {
+            resolve();
+          },
+          error: err => {
+            reject(err);
+          }
+        });
+      } else {
+        resolve();
+      }
+    }),
+    new Promise((resolve, reject) => {
+      if (JSON.stringify(categories_prev) != JSON.stringify(categories)) {
+        const form = new FormData();
+        form.append("categories", JSON.stringify(categories));
+        $.ajax({
+          url: `/jsapi/sounds/${sound.id}/categories`,
+          method: "POST",
+          data: form,
+          contentType: false,
+          processData: false,
+          success: () => {
+            resolve();
+          },
+          error: err => {
+            reject(err);
+          }
+        });
+      } else {
+        resolve();
+      }
+    })
+  ]).then(() => {
+    $("#editSoundModal").modal("hide");
+    reload();
+  });
 }
+
+function deleteSound(obj) {
+  const sound: Sound = $(obj)
+    .parents("#deleteSoundModal")
+    .data("sound");
+
+  $.ajax({
+    url: `/jsapi/sounds/${sound.id}`,
+    method: "DELETE"
+  }).done(() => {
+    $(".modal").modal("hide");
+    reload();
+  });
+}
+
+function reload() {
+  let curCategory = $("#categorylist > .active").data("id");
+  loadCategories(() => {
+    const curCategoryElement = $("#categorylist").find(
+      `[data-id="${curCategory}"]`
+    );
+    if (curCategory && curCategory.length > 0) {
+      curCategory.click();
+    } else {
+      $("#categorylist")
+        .children()
+        .first()
+        .click();
+    }
+  });
+}
+
+const categories = new Bloodhound({
+  datumTokenizer: Bloodhound.tokenizers.obj.whitespace("name"),
+  queryTokenizer: Bloodhound.tokenizers.whitespace,
+  prefetch: {
+    url: "/jsapi/categories"
+  }
+});
+
+categories.initialize();
+
+$("select").tagsinput({
+  typeaheadjs: {
+    name: "categories",
+    displayKey: "name",
+    valueKey: "name",
+    source: categories.ttAdapter()
+  }
+});

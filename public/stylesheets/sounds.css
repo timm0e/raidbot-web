@@ -23,9 +23,9 @@
     .edit-icon .fa-pencil:hover {
       opacity: 1; }
   .edit-icon a {
-    color: black; }
+    color: white; }
     .edit-icon a:hover {
-      color: black; }
+      color: white !important; }
 
 .category {
   transition: background-color .25s ease; }

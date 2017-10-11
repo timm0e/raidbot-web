@@ -1,4 +1,27 @@
 extends layout
 
-append head
+block header
     title RaidBot
+
+block content
+        .jumbotron
+            .container
+                -
+                    var heading = function(){
+                        let rand = Math.floor(Math.random() * 4 + 0.9);
+                        switch(rand) {
+                            case 0:
+                                return "I bims 1 RaidBot!"
+                            case 1:
+                                return "Willkommen beim RaidBot"
+                            case 2:
+                                return "Hallo, Ich bin der RaidBot!"
+                            case 3:
+                                return "Der neue RaidBot"
+                            case 4:
+                                return "Der beste SoundBot des Discord Servers"
+                        }
+                    }();
+                h1= heading
+                br
+                p Jetzt einloggen zum durchstarten!

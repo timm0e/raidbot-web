@@ -388,6 +388,14 @@ router.put("/sounds/new", (req, res, next) => {
   });
 });
 
+router.post("/play/:sound_id", (req, res, next) => {
+  let user = req.session.user;
+  let sound_id = req.params.sound_id;
+
+  db.send("playSound", {uid: user.id, sid: sound_id});
+  res.sendStatus(200);
+});
+
 module.exports = raidbotdb => {
   db = raidbotdb;
   return router;

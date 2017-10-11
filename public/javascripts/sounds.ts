@@ -31,7 +31,7 @@ const soundAdmin = (id, name, length) =>
 const listLoading: string =
   "<li class='list-group-item text-center'><span class='fa fa-refresh fa-spin'></span></li>";
 
-var entityMap = {
+var escapeMap = {
   "&": "&amp;",
   "<": "&lt;",
   ">": "&gt;",
@@ -44,7 +44,7 @@ var entityMap = {
 
 function escapeHtml(string: string): String {
   return String(string).replace(/[&<>"'`=\/]/g, function(s) {
-    return entityMap[s];
+    return escapeMap[s];
   });
 }
 

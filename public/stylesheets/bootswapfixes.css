@@ -1,3 +1,7 @@
-a:hover,a:active,a:focus {
+a:hover {
     color: #303030 !important
+}
+
+a:active,a:focus{
+    color: white !important
 }

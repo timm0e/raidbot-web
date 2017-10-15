@@ -5,14 +5,7 @@ var router = express.Router();
 var formurlencoded = require("form-urlencoded");
 var request = require("request-promise-native");
 var redis;
-var raidbotConfig = {
-  //FIXME: Replace this stub
-  clientID: "354448371404242945",
-  clientSecret: "PziouUFlBrGJ9ZMLrD2c_vmIj5NdpiHp",
-  guildId: "118431384854331396",
-  hostname: "http://127.0.0.1:3000",
-  filepath: "/mnt/RaidBot/sounds/"
-};
+var raidbotConfig;// new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
 
 const discordApi = {
   authUrl: "https://discordapp.com/api/oauth2/authorize",
@@ -120,7 +113,8 @@ function authMiddleware(req, res, next) {
 }
 
 router.authMiddleware = authMiddleware;
-module.exports = db => {
+module.exports = (db, raidbotconfig) => {
+  raidbotConfig = raidbotconfig;
   redis = db;
   return router;
 };

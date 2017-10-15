@@ -22,6 +22,7 @@
     "node-sass-middleware": "^0.9.8",
     "numeral": "^2.0.6",
     "pug": "^2.0.0-rc.3",
+    "raidbot-config": "file:../raidbot-config/raidbot-config-1.0.0.tgz",
     "raidbot-redis-lib": "file:../raidbot-redis-lib/raidbot-redis-lib-1.0.0.tgz",
     "request-promise-native": "^1.0.4",
     "serve-favicon": "^2.4.3"

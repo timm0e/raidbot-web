@@ -6,17 +6,8 @@ var fs = require("fs");
 var formidable = require("formidable");
 var mv = require("mv");
 
-var db = new (require("raidbot-redis-lib")).RaidBotDB("test");
-
-var raidbotConfig = {
-  //FIXME: Replace this stub
-  //TODO: TOML
-  clientID: "354448371404242945",
-  clientSecret: "PziouUFlBrGJ9ZMLrD2c_vmIj5NdpiHp",
-  guildId: "118431384854331396",
-  hostname: "http://127.0.0.1:3000",
-  filepath: "/mnt/RaidBot/sounds/"
-};
+var db = new (require("raidbot-redis-lib")).RaidBotDB("test"); // FIXME: Only for dev
+var raidbotConfig;//= new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
 
 router.get("/categories", function(req, res, next) {
   db
@@ -145,7 +136,7 @@ router.delete("/sounds/:sound_id", (req, res, next) => {
       Promise.all([
         db.deleteSound(sound_id),
         new Promise((resolve, reject) => {
-          fs.unlink(raidbotConfig.filepath + sound.file, err => {
+          fs.unlink(raidbotConfig.soundpath + sound.file, err => {
             if (err) reject(err);
             else resolve();
           });
@@ -317,7 +308,7 @@ router.put("/sounds/new", (req, res, next) => {
     const file = files.sound;
 
     if (file && name && name != "" && file != undefined) {
-      let newpath = raidbotConfig.filepath + file.hash;
+      let newpath = raidbotConfig.soundpath + file.hash;
 
       fs.access(newpath, fs.constants.F_OK, err => {
         if (err) {
@@ -396,7 +387,8 @@ router.post("/play/:sound_id", (req, res, next) => {
   res.sendStatus(200);
 });
 
-module.exports = raidbotdb => {
+module.exports = (raidbotdb, raidbotconfig) => {
+  raidbotConfig = raidbotconfig;
   db = raidbotdb;
   return router;
 };

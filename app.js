@@ -15,11 +15,12 @@ var flash = require("connect-flash");
 
 var redis = new ioredis({ connectionName: "webAuth", db: 1 });
 var raidbotdb = new raidbotlib.RaidBotDB("web"); //TODO: config
+var raidbotconfig = require("raidbot-config")();
 
 
 var generic = require("./routes/generic");
-var jsapi = require("./routes/jsapi")(raidbotdb);
-var auth = require("./routes/auth")(redis);
+var jsapi = require("./routes/jsapi")(raidbotdb, raidbotconfig);
+var auth = require("./routes/auth")(redis, raidbotconfig);
 
 var app = express();
 

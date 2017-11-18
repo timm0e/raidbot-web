@@ -6,7 +6,7 @@ var fs = require("fs");
 var formidable = require("formidable");
 var mv = require("mv");
 
-var db = new (require("raidbot-redis-lib")).RaidBotDB("test"); // FIXME: Only for dev
+var db;// = new (require("raidbot-redis-lib")).RaidBotDB("test"); // FIXME: Only for dev
 var raidbotConfig;//= new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
 
 router.get("/categories", function(req, res, next) {
@@ -239,7 +239,11 @@ router.post("/sounds/:sound_id/categories", (req, res, next) => {
 });
 
 router.post("/joinsound/:uid/", (req, res, next) => {
-  //TODO: Implement Auth
+  const uid = req.params.uid;
+  if (!(req.session.user.id == uid || req.session.user.isAdmin)) {
+    res.sendStatus(401);
+    return;
+  }
 
   const form = new formidable.IncomingForm();
 
@@ -249,7 +253,6 @@ router.post("/joinsound/:uid/", (req, res, next) => {
   };
 
   form.parse(req, (err, fields, files) => {
-    const uid = req.params.uid;
     const sid = Number.parseInt(fields.sid);
 
     debugger;
@@ -314,7 +317,7 @@ router.put("/sounds/new", (req, res, next) => {
         if (err) {
           mv(file.path, newpath, err => {
             mediainfo.exec(newpath, (err, obj) => {
-              let duration = Math.ceil(obj.file.track[0].duration / 1000);
+              let duration = Math.ceil(obj.media.track[0].duration / 1000);
 
               db
                 .createSound(name, duration, req.session.user.id, file.hash)
@@ -381,7 +384,12 @@ router.put("/sounds/new", (req, res, next) => {
 
 router.post("/play/:sound_id", (req, res, next) => {
   let user = req.session.user;
-  let sound_id = req.params.sound_id;
+  let sound_id = parseInt(req.params.sound_id);
+
+  if (isNaN(sound_id)) {
+    res.sendStatus(400);
+    return;
+  }
 
   db.send("playSound", {uid: user.id, sid: sound_id});
   res.sendStatus(200);

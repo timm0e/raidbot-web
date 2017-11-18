@@ -5,7 +5,7 @@ var router = express.Router();
 var formurlencoded = require("form-urlencoded");
 var request = require("request-promise-native");
 var redis;
-var raidbotConfig;// new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
+var raidbotConfig;// = new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
 
 const discordApi = {
   authUrl: "https://discordapp.com/api/oauth2/authorize",
@@ -26,7 +26,7 @@ router.get("/discord", (req, res, next) => {
       client_id: raidbotConfig.clientID,
       scope: "identify guilds",
       response_type: "code",
-      redirect_uri: raidbotConfig.hostname + "/auth/discord/callback/"
+      redirect_uri: raidbotConfig.hostname + "auth/discord/callback/"
     });
 
   res.redirect(url);
@@ -41,7 +41,7 @@ router.get("/discord/callback", (req, res, next) => {
         form: {
           client_id: raidbotConfig.clientID,
           client_secret: raidbotConfig.clientSecret,
-          redirect_uri: "http://127.0.0.1:3000/auth/discord/callback/",
+          redirect_uri: raidbotConfig.hostname + "auth/discord/callback/",
           grant_type: "authorization_code",
           code: code
         }
@@ -71,7 +71,7 @@ router.get("/discord/callback", (req, res, next) => {
               .then(response => JSON.parse(response))
               .then(guilds => {
                 guilds.forEach(function(guild) {
-                  if (guild.id === raidbotConfig.guildId) {
+                  if (guild.id === raidbotConfig.guildID) {
                     user.isMember = true;
                     if ((guild.permissions & 8) > 0) {
                       //0x00000008 = ADMINISTRATOR flag

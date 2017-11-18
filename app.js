@@ -12,11 +12,9 @@ var ioredis = require("ioredis");
 var raidbotlib = require("raidbot-redis-lib");
 var flash = require("connect-flash");
 
-
 var redis = new ioredis({ connectionName: "webAuth", db: 1 });
-var raidbotdb = new raidbotlib.RaidBotDB("web"); //TODO: config
+var raidbotdb = new raidbotlib.RaidBotDB("web");
 var raidbotconfig = require("raidbot-config")();
-
 
 var generic = require("./routes/generic");
 var jsapi = require("./routes/jsapi")(raidbotdb, raidbotconfig);
@@ -27,7 +25,6 @@ var app = express();
 // view engine setup
 app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "pug");
-
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
@@ -55,24 +52,20 @@ app.use(express.static(path.join(__dirname, "public")));
 
 // Auth Setup
 
-
 app.use(
   session({
-    secret: "Mein Main is Supreme!11", //dank memes
+    secret: raidbotconfig.cookieSecret, //dank memes
     name: "RaidBot Session",
-    store: new connectRedis({ client: redis }),
-    
+    store: new connectRedis({ client: redis })
   })
 );
-
 
 app.use("/auth/", auth);
 
 app.use("/", generic("index"));
 app.use("/sounds", auth.authMiddleware, generic("sounds"));
 app.use("/upload", auth.authMiddleware, generic("upload"));
-app.use("/jsapi", jsapi); //TODO: Auth Middleware
-
+app.use("/jsapi", auth.authMiddleware, jsapi);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

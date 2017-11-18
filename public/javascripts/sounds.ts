@@ -170,8 +170,18 @@ function loadSounds(cat_id: number): void {
             )
           );
       });
+
+      soundlist.find(".sound-btn").each((_, button) => {
+        $(button).click(() => {
+          playSound(
+            $(button)
+              .parents(".sound-item")
+              .attr("data-id")
+          );
+        });
+      });
+
       soundlist.fadeIn(200);
-      0;
     });
   });
 }
@@ -255,6 +265,13 @@ function deleteSound(obj) {
   }).done(() => {
     $(".modal").modal("hide");
     reload();
+  });
+}
+
+function playSound(sid: string) {
+  $.ajax({
+    url: `/jsapi/play/${sid}`,
+    method: "POST"
   });
 }
 

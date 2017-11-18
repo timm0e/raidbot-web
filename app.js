@@ -56,7 +56,8 @@ app.use(
   session({
     secret: raidbotconfig.cookieSecret, //dank memes
     name: "RaidBot Session",
-    store: new connectRedis({ client: redis })
+    store: new connectRedis({ client: redis , host: process.env.RAIDBOT_REDIS_HOST,
+      port: process.env.RAIDBOT_REDIS_PORT ? parseInt(process.env.RAIDBOT_REDIS_PORT, 10) : undefined})
   })
 );
 

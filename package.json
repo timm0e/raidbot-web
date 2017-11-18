@@ -5,6 +5,9 @@
   "scripts": {
     "start": "node ./bin/www"
   },
+  "bin": {
+    "raidbot-web": "./bin/www"
+  },
   "dependencies": {
     "body-parser": "^1.17.2",
     "connect-flash": "^0.1.1",

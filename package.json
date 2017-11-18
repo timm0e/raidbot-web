@@ -25,8 +25,8 @@
     "node-sass-middleware": "^0.9.8",
     "numeral": "^2.0.6",
     "pug": "^2.0.0-rc.3",
-    "raidbot-config": "https://github.com/timm0e/raidbot-releases/releases/download/0.0.1/raidbot-config-0.0.1.tgz",
-    "raidbot-redis-lib": "https://github.com/timm0e/raidbot-releases/releases/download/0.0.1/raidbot-redis-lib-0.0.1.tgz",
+    "raidbot-config": "https://github.com/timm0e/raidbot-releases/releases/download/latest/raidbot-config-latest.tgz",
+    "raidbot-redis-lib": "https://github.com/timm0e/raidbot-releases/releases/download/latest/raidbot-redis-lib-latest.tgz",
     "request-promise-native": "^1.0.4",
     "serve-favicon": "^2.4.3"
   },

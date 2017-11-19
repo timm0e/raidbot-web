@@ -12,7 +12,8 @@ var ioredis = require("ioredis");
 var raidbotlib = require("raidbot-redis-lib");
 var flash = require("connect-flash");
 
-var redis = new ioredis({ connectionName: "webAuth", db: 1 });
+var redis = new ioredis({ connectionName: "webAuth", db: 1, host: process.env.RAIDBOT_REDIS_HOST,
+port: process.env.RAIDBOT_REDIS_PORT ? parseInt(process.env.RAIDBOT_REDIS_PORT, 10) : undefined });
 var raidbotdb = new raidbotlib.RaidBotDB("web");
 var raidbotconfig = require("raidbot-config")();
 
@@ -56,8 +57,7 @@ app.use(
   session({
     secret: raidbotconfig.cookieSecret, //dank memes
     name: "RaidBot Session",
-    store: new connectRedis({ client: redis , host: process.env.RAIDBOT_REDIS_HOST,
-      port: process.env.RAIDBOT_REDIS_PORT ? parseInt(process.env.RAIDBOT_REDIS_PORT, 10) : undefined})
+    store: new connectRedis({ client: redis})
   })
 );
 

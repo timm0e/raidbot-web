@@ -317,7 +317,25 @@ router.put("/sounds/new", (req, res, next) => {
         if (err) {
           mv(file.path, newpath, err => {
             mediainfo.exec(newpath, (err, obj) => {
-              let duration = Math.ceil(obj.media.track[0].duration / 1000);
+              if (err) {
+                console.log(err);
+                return err;
+              }
+
+              
+              let media_context; // Shoutouts to mediainfo for changing their formats and package maintainers for not updating
+              if (obj.media)
+                media_context = obj.media;
+              else if (obj.file)
+                media_context = obj.file;
+              
+              let duration; 
+
+              if (media_context)
+                duration = Math.ceil(media_context.track[0].duration / 1000);
+              else
+                console.log("Error with medialib... Please report this! Setting duration to 0 for now...");
+                duration = 0;
 
               db
                 .createSound(name, duration, req.session.user.id, file.hash)

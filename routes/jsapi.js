@@ -6,8 +6,8 @@ var fs = require("fs");
 var formidable = require("formidable");
 var mv = require("mv");
 
-var db;// = new (require("raidbot-redis-lib")).RaidBotDB("test"); // FIXME: Only for dev
-var raidbotConfig;//= new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
+var db; // = new (require("raidbot-redis-lib")).RaidBotDB("test"); // FIXME: Only for dev
+var raidbotConfig; //= new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
 
 router.get("/categories", function(req, res, next) {
   db
@@ -322,20 +322,16 @@ router.put("/sounds/new", (req, res, next) => {
                 return err;
               }
 
-              
-              let media_context; // Shoutouts to mediainfo for changing their formats and package maintainers for not updating
-              if (obj.media)
-                media_context = obj.media;
+              let duration; // Shoutouts to mediainfo for changing their formats and package maintainers for not updating
+              if (obj.media) duration = Math.ceil(obj.media.track[0].duration);
               else if (obj.file)
-                media_context = obj.file;
-              
-              let duration; 
-
-              if (media_context)
-                duration = Math.ceil(media_context.track[0].duration / 1000);
-              else
-                console.log("Error with medialib... Please report this! Setting duration to 0 for now...");
+                duration = Math.ceil(obj.file.track[0].duration / 1000);
+              else {
+                console.log(
+                  "Error with medialib... Please report this! Setting duration to 0 for now..."
+                );
                 duration = 0;
+              }
 
               db
                 .createSound(name, duration, req.session.user.id, file.hash)
@@ -409,7 +405,7 @@ router.post("/play/:sound_id", (req, res, next) => {
     return;
   }
 
-  db.send("playSound", {uid: user.id, sid: sound_id});
+  db.send("playSound", { uid: user.id, sid: sound_id });
   res.sendStatus(200);
 });
 

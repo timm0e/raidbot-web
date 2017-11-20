@@ -339,6 +339,7 @@ router.put("/sounds/new", (req, res, next) => {
                   return sound.id;
                 })
                 .then(sid => {
+                  if (!fields.categories) return Promise.resolve();
                   const categories = {
                     strings: JSON.parse(fields.categories),
                     map: {}

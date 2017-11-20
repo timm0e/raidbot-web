@@ -23,7 +23,7 @@ const category = (id, name, membercount) =>
   `<li class="list-group-item category" data-id="${id}">${name}<span class="glyphicon glyphicon-chevron-right pull-right"></span><span class="badge pull-right">${membercount}</span></li>`;
 
 const sound = (id, name, length) =>
-  `<li class="sound-item list-group-item" data-id="${id}>${name}<div class="flex-right"><span class="badge" style="margin-right: 10px;">${length}</span><button class="btn btn-md btn-default sound-btn" type="button"><span class="glyphicon glyphicon-play"></span></button></div></li>`;
+  `<li class="sound-item list-group-item" data-id=${id}>${name}<div class="flex-right"><span class="badge" style="margin-right: 10px;">${length}</span><button class="btn btn-md btn-default sound-btn" type="button"><span class="glyphicon glyphicon-play"></span></button></div></li>`;
 
 const soundAdmin = (id, name, length) =>
   `<li class="sound-item list-group-item" data-id=${id}>${name}<div class="flex-left edit-icon"><a data-toggle="modal" data-target="#editSoundModal"><span class="fa fa-pencil"></span></a></div><div class="flex-right"><span class="badge" style="margin-right: 10px;">${length}</span><button class="btn btn-md btn-default sound-btn" type="button"><span class="glyphicon glyphicon-play"></span></button></div></li>`;

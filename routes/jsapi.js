@@ -1,10 +1,11 @@
 //@ts-check
 var express = require("express");
 var router = express.Router();
-var mediainfo = require("mediainfo-parser");
 var fs = require("fs");
 var formidable = require("formidable");
 var mv = require("mv");
+var ffprobe = require("ffprobe");
+var ffprobeStatic = require("ffprobe-static");
 
 var db; // = new (require("raidbot-redis-lib")).RaidBotDB("test"); // FIXME: Only for dev
 var raidbotConfig; //= new (require("raidbot-config").RaidBotConfig); //FIXME: only for dev
@@ -316,22 +317,13 @@ router.put("/sounds/new", (req, res, next) => {
       fs.access(newpath, fs.constants.F_OK, err => {
         if (err) {
           mv(file.path, newpath, err => {
-            mediainfo.exec(newpath, (err, obj) => {
+            ffprobe(newpath, {path:ffprobeStatic.path}, (err, obj) => {
               if (err) {
                 console.log(err);
                 return err;
               }
 
-              let duration; // Shoutouts to mediainfo for changing their formats and package maintainers for not updating
-              if (obj.media) duration = Math.ceil(obj.media.track[0].duration);
-              else if (obj.file)
-                duration = Math.ceil(obj.file.track[0].duration / 1000);
-              else {
-                console.log(
-                  "Error with medialib... Please report this! Setting duration to 0 for now..."
-                );
-                duration = 0;
-              }
+              let duration = Math.round(obj.streams[0].duration);
 
               db
                 .createSound(name, duration, req.session.user.id, file.hash)

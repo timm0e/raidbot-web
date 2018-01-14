@@ -1,8 +1,14 @@
 .sound-item {
   display: flex !important;
   align-items: center !important; }
-  .sound-item .badge {
-    height: 17px; }
+  .sound-item .badge, .sound-item .fa-info-circle {
+    height: 17px;
+    margin-right: 10px; }
+  .sound-item .fa-info-circle {
+    opacity: 0.5;
+    transition: opacity 0.25s ease-in-out; }
+    .sound-item .fa-info-circle:hover {
+      opacity: 1; }
   .sound-item button {
     transition: background-color .2s ease, border-color .2s ease; }
 
